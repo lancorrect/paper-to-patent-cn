@@ -1,0 +1,12 @@
+{
+  "title": "一种……的方法",
+  "source_md": "草案.md",
+  "template_dir": "../../模板",
+  "figures": [
+    {"file": "architecture.png", "caption": "图1 整体架构示意图"},
+    {"file": "module.png",       "caption": "图2 图1 中××模块的结构示意图"},
+    {"file": "training.png",     "caption": "图3 训练过程示意图"},
+    {"file": "flowchart.png",    "caption": "图4 实现步骤流程图"}
+  ],
+  "abstract_figure": "flowchart.png"
+}
