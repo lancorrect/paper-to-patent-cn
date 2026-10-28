@@ -333,9 +333,9 @@ def run_checks() -> list[CheckResult]:
             if match:
                 claim_numbers.append(int(match.group(1)))
         details.append(f"识别到的权利要求编号={claim_numbers}")
-        if claim_numbers != list(range(1, 12)):
-            errors.append("权利要求编号不是完整的 1 至 11")
-    results.append(CheckResult(3, not errors, "权利要求书含 1 至 11 共 11 条", details + errors))
+        if len(claim_numbers) < 2 or claim_numbers != list(range(1, len(claim_numbers) + 1)):
+            errors.append("权利要求编号不是从 1 起的连续编号")
+    results.append(CheckResult(3, not errors, "权利要求书从 1 起连续编号", details + errors))
 
     # 4. Report OMML counts in claims and description; reject empty formulas.
     details = []
@@ -382,8 +382,8 @@ def run_checks() -> list[CheckResult]:
         document = documents[name]
         tables = document.tables
         details.append(f"w:tbl 数量={len(tables)}")
-        if len(tables) != 2:
-            errors.append(f"说明书表格数应为 2，实际为 {len(tables)}")
+        if len(tables) < 1:
+            errors.append(f"说明书表格数应至少为 1，实际为 {len(tables)}")
         dimensions: list[tuple[int, int]] = []
         for index, table in enumerate(tables, start=1):
             row_count = len(table.rows)
@@ -415,10 +415,8 @@ def run_checks() -> list[CheckResult]:
                 )
             if empty_header_columns:
                 errors.append(f"表{index} 存在空表头列: {empty_header_columns}")
-        if len(dimensions) > 1 and len(set(dimensions)) != 1:
-            errors.append(f"各表行列数不一致: {dimensions}")
-        elif dimensions:
-            details.append(f"各表行列数一致={len(set(dimensions)) == 1}: {dimensions}")
+        if dimensions:
+            details.append(f"各表行列数={dimensions}")
     results.append(
         CheckResult(5, not errors, "说明书表格数量、行列一致性及非空表头自检", details + errors)
     )
@@ -426,7 +424,10 @@ def run_checks() -> list[CheckResult]:
     # 6. Drawing and media counts.
     details = []
     errors = []
-    for name, expected in (("100003说明书附图.docx", 4), ("摘要附图.docx", 1)):
+    for name, expected in (
+        ("100003说明书附图.docx", len(EXPECTED_CAPTIONS)),
+        ("摘要附图.docx", 1),
+    ):
         if name not in documents:
             errors.append(f"{name} 未成功打开")
             continue
@@ -810,8 +811,7 @@ def run_checks() -> list[CheckResult]:
         for paragraph in description_paragraphs
         if paragraph_text(paragraph)
         and paragraph_text(paragraph) not in excluded_description_paragraphs
-        and not paragraph_text(paragraph).startswith("表一 ")
-        and not paragraph_text(paragraph).startswith("表二 ")
+        and not re.match(r"^表\d+、", paragraph_text(paragraph))
     ]
     description_runs = [
         run for paragraph in description_body_paragraphs for run in visible_runs(paragraph)

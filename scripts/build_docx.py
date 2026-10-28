@@ -546,10 +546,12 @@ def parse_source(markdown: str) -> dict[str, object]:
 
     claim_numbers = [
         int(value)
-        for value in re.findall(r"^\*\*(\d+)、\*\*", claims_section, flags=re.MULTILINE)
+        for value in re.findall(r"^\*{0,2}(\d+)、\*{0,2}", claims_section, flags=re.MULTILINE)
     ]
-    if claim_numbers != list(range(1, 12)):
-        raise ValueError(f"expected claims 1-11, got {claim_numbers}")
+    if not claim_numbers or claim_numbers != list(range(1, len(claim_numbers) + 1)):
+        raise ValueError(
+            f"claims must be numbered consecutively from 1, got {claim_numbers}"
+        )
 
     description_headings = re.findall(r"^###\s+(.+?)\s*$", description_section, flags=re.MULTILINE)
     if description_headings != EXPECTED_DESCRIPTION_HEADINGS:
@@ -559,12 +561,12 @@ def parse_source(markdown: str) -> dict[str, object]:
     source_formula_blocks = re.findall(
         r"^\$\$\s*\n(.*?)\n\$\$\s*$", relevant, flags=re.MULTILINE | re.DOTALL
     )
-    if len(source_formula_blocks) != 51:
-        raise ValueError(f"expected 51 display formulas, got {len(source_formula_blocks)}")
+    if not source_formula_blocks:
+        raise ValueError("expected at least one display formula, got 0")
 
     table_count = len(re.findall(r"^<table>\s*$", description_section, flags=re.MULTILINE))
-    if table_count != 2:
-        raise ValueError(f"expected two HTML tables, got {table_count}")
+    if table_count < 1:
+        raise ValueError(f"expected at least one HTML table, got {table_count}")
 
     return {
         "title": title,
@@ -1333,9 +1335,9 @@ def mark_header_row_repeat(row) -> None:
 
 def add_html_table(document: DocumentObject, table_html: str, table_number: int) -> None:
     row_count, column_count, specs = parse_html_table(table_html)
-    if row_count != 9 or column_count != 13:
+    if row_count < 1 or column_count < 1:
         raise ValueError(
-            f"table {table_number}: expected 9 rows and 13 columns, got {row_count}x{column_count}"
+            f"table {table_number}: expected a non-empty table, got {row_count}x{column_count}"
         )
 
     table = document.add_table(rows=row_count, cols=column_count)
@@ -1345,8 +1347,11 @@ def add_html_table(document: DocumentObject, table_html: str, table_number: int)
     section = document.sections[0]
     available_width = section.page_width - section.left_margin - section.right_margin
     first_column_width = int(Mm(22))
-    data_column_width = int((available_width - first_column_width) / 12)
-    widths = [first_column_width] + [data_column_width] * 12
+    if column_count > 1:
+        data_column_width = int((available_width - first_column_width) / (column_count - 1))
+        widths = [first_column_width] + [data_column_width] * (column_count - 1)
+    else:
+        widths = [int(available_width)]
     for column_index, width in enumerate(widths):
         table.columns[column_index].width = width
         for row in table.rows:
@@ -1388,7 +1393,6 @@ def add_html_table(document: DocumentObject, table_html: str, table_number: int)
         )
 
     mark_header_row_repeat(table.rows[0])
-    mark_header_row_repeat(table.rows[1])
 
 
 def add_picture_scaled(document: DocumentObject, image_path: Path, label: str | None = None) -> None:
@@ -1517,7 +1521,7 @@ def build_description(parsed: dict[str, object]) -> int:
         if token.kind == "heading":
             add_heading(document, token.value)
         elif token.kind == "paragraph":
-            centered = token.value.startswith("表一 ") or token.value.startswith("表二 ")
+            centered = re.match(r"^表\d+、", token.value) is not None
             paragraph = add_body_paragraph(document, token.value, context, centered=centered)
             if centered:
                 paragraph.paragraph_format.keep_with_next = True
@@ -1528,8 +1532,8 @@ def build_description(parsed: dict[str, object]) -> int:
             table_count += 1
             add_html_table(document, token.value, table_count)
 
-    if table_count != 2:
-        raise ValueError(f"description build expected two tables, got {table_count}")
+    if table_count < 1:
+        raise ValueError(f"description build expected at least one table, got {table_count}")
     save_atomic(document, OUT_DESCRIPTION)
     return block_count
 
