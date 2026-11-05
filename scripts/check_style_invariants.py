@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""去 AI 味改写的不变量校验：比较改写前后两份 md 草案，确认只动了表达、没动内容。
+"""文风校订的不变量校验：比较改写前后两份 md 草案，确认只动了表达、没动内容。
 
 用法：
     python check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.txt
@@ -8,7 +8,7 @@
 用户决定修改权利要求后，用 --allow-claims 放行第 3 项，差异仍会打印出来。
 
 这个脚本只能证明数字、公式、术语、固定句式没变，查不出句子含义有没有变，
-所以它替代不了人工审核（见 references/02b-去AI味.md）。
+所以它替代不了人工审核（见 references/文风校订.md）。
 
 退出码：0 全部通过；1 有校验项不过；2 输入有问题（文件缺失、章节切不出来）。
 """
@@ -290,7 +290,7 @@ def print_report(results: list[CheckResult]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="校验去 AI 味改写没有动内容")
+    parser = argparse.ArgumentParser(description="校验文风校订的改写没有动内容")
     parser.add_argument("before", type=Path, help="改写前的 md 草案")
     parser.add_argument("after", type=Path, help="改写后的 md 草案")
     parser.add_argument("--terms", type=Path, required=True, help="术语表，每行一个词")

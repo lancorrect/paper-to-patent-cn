@@ -1,94 +1,163 @@
+<div align="center">
+
 # paper-to-patent-cn
 
-把一篇学术论文改写成可交付专利代理机构的中国发明专利申请文件。
+### 学术论文 → 骨架映射与作者审核 → 中国发明专利申请文件
 
-这是一个 [Claude Code](https://claude.com/claude-code) skill。它覆盖从论文分析到 Word 五标准件打包的完整链路，并带七个可直接运行的 Python 脚本。
+**将学术论文改写为可交付专利代理机构的五件 Word 申请文件。**
 
-## 它是怎么来的
+[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)](#license-and-commercial-use)
+[![Clients](https://img.shields.io/badge/Clients-Claude%20Code%20%7C%20Codex-blueviolet.svg)](#安装)
 
-每一条规则都来自一次真实的申请：一篇深度学习方法论文，经七个月改写、两轮代理机构返修后递交 CNIPA。文档里凡是写「代理机构实际改过」「实测」「踩过的坑」的地方，都是实际发生过的意见或实际造成过返工的错误，不是推测。
+**允许非商业使用。商业使用须事先获得书面授权。**
 
-所以它的目标不是「能写出一份专利」，而是**一次写成的稿子就达到代理机构两轮意见改完之后的水平**。
+[功能](#功能) · [快速开始](#快速开始) · [安装](#安装) · [License](#license-and-commercial-use) · [致谢](#致谢)
+
+<img src="assets/overview.png" alt="paper-to-patent-cn 的流程与特性：从学术论文开始，经骨架映射、撰写、文风校订、附图、Word 打包、事实源转正和交付与返修，产出权利要求书、说明书、说明书附图、说明书摘要和摘要附图" width="860">
+
+</div>
+
+> 本项目是撰写辅助工具，不替代专利代理人。新颖性、创造性、侵权、申请时机等法律判断，本 skill 不下结论。
+
+## 功能
+
+完整流程如下，工作流与日志贯穿全程：
+
+**论文分析与骨架映射 → 撰写 → 文风校订 → 附图 → Word 打包 → 事实源转正 → 交付与返修**
+
+| 流程 | 目的 | 功能 |
+|---|---|---|
+| 论文分析与骨架映射 | 确定专利的保护范围，避免照搬论文结构 | 以专利结构为模具逐项对应论文内容，产出映射表、剔除清单和权利要求结构；列出不能从论文推断的实现细节，交由作者核实 |
+| 撰写 | 使首稿符合 CNIPA 要求和代理机构的审核标准，减少返修 | 依据映射表生成权利要求书、说明书和摘要的全文草案；规范覆盖公式与符号、步骤与数据流、术语一致性、有益效果和实施例写法，并提供交稿前自查表 |
+| 文风校订 | 去除首稿的 AI 写作痕迹，同时保证技术内容不变 | 由未参与撰写的 agent 审计并改写，审计同时起到盲审作用；权利要求只报告不改写；校验脚本核对数字、公式、术语和固定句式 |
+| 附图 | 保证附图与文字一致，且只有一个可编辑来源 | 以一个 PPT 合集管理全部附图，可基于论文框架图的 PPT 修改；流程图的框与技术方案的步骤一一对应；脚本导出 300 dpi 的 PNG |
+| Word 打包 | 产出符合官方格式、公式可编辑的五个标准件 | 以官方模板为底稿生成五件 docx；将 LaTeX 公式转为 Word 原生公式；依次经过 12 项格式体检、独立终审和用户目视验收 |
+| 事实源转正与快照 | 防止重新生成覆盖手工修改，并使二进制文件的变更可读 | 验收通过后以 docx 为唯一事实源，不再重新生成；导出只读的 md 快照，随提交入库 |
+| 交付与返修 | 依据代理机构的意见回改，并保留全部修订痕迹 | 读取批注和修订，包括批注中嵌入的公式；比对两轮稿件；以 Word 修订模式写入，写入前检查文件锁，写入后做接受和拒绝的双向验证 |
+| 工作流与日志（贯穿全程） | 保留可追溯的版本和变更记录 | 按版本目录存放产物；按专利分开记录日志和索引；git 提交前由用户审核 |
+
+适用范围为「方法类论文 → 方法专利」。系统类、装置类需另行调整权利要求布局和附图。外观设计、实用新型、PCT 和外国申请不在范围内。
+
+## 快速开始
+
+安装完成后，在 agent 中打开存放专利文件的目录，以自然语言发起任务。
+
+### 1. 分析论文
+
+```text
+使用 paper-to-patent-cn，将 paper/my_paper.pdf 改写为中国发明专利申请文件。
+```
+
+Agent 读取论文后，输出映射表、剔除清单和权利要求结构，并列出需要作者核实的实现细节。用户确认前不开始撰写。
+
+### 2. 撰写并校订文风
+
+```text
+方案已确认，撰写五件草案，并执行文风校订。
+```
+
+产出 `v1/草案.md` 和审计表。审计表列出每处改动和技术疑点，由用户决定取舍。
+
+### 3. 生成附图并打包
+
+```text
+草案已确认，生成附图并打包五件 Word。
+```
+
+产出 `v1/figures/` 和 `v1/word/`。用户在 Word 中验收通过后，docx 转正为事实源，后续修改都落在 docx 上。
+
+### 4. 处理代理机构返修
+
+```text
+代理机构返回了修改意见 revise_v1/修改意见.docx，请逐条处理批注并回改。
+```
+
+改动以 Word 修订模式写入，代理机构原有的批注和修订全部保留。
+
+**以下节点必须由用户确认，agent 不自行决定**：映射表和权利要求结构、实现细节的真实写法、实验数据的取舍、文风校订的改动、附图的版面和内容、Word 验收、git 提交。
+
+### 目录与版本更新
+
+```text
+<专利短名>/
+├── INDEX.md               # 专利名称、来源论文、当前状态、最新日志
+├── logs/                  # 每日工作日志
+├── paper/                 # 来源论文，不纳入版本体系
+├── v1/                    # 成稿阶段：首份生成稿；作者手写的基线稿须冻结
+│   ├── 草案.md             # 转正前的事实源，转正后只作存档
+│   ├── 论文映射.md          # 映射表，跟随版本
+│   ├── figures/           # 附图合集.pptx 和导出的 PNG
+│   ├── word/              # 五件 docx，转正后的事实源
+│   └── snapshots/         # 只读的 md 快照
+├── v2/ v3/ …              # 成稿阶段的后续版本
+└── revise_v1/ revise_v2/ … # 修改阶段：每轮代理机构意见一个目录
+    ├── …修改意见.docx      # 代理机构返回的原件，只读
+    └── …修改稿_v1.docx     # 本轮的工作文件，以修订模式修改
+```
+
+版本按以下规则更新：
+
+| 目录 | 何时新建 | 规则 |
+|---|---|---|
+| `vN`（成稿阶段） | 距上次版本操作超过 24 小时可新建。24 小时内除非用户明确要求，改动落在当前版本；改动量大时由用户决定 | 每版目录保存该版的全部产物 |
+| `revise_vN`（修改阶段） | 只有收到代理机构新一轮意见才新建。同一轮内多次修改都落在当前目录 | N 是意见的轮次，不是修改次数。新建时不覆盖上一轮 |
+
+成稿和修改是先后两个阶段。修改阶段开始后，成稿阶段的最后一版冻结存档。
+
+各阶段的规范见 [`references/`](references/)，脚本的用法见 [`scripts/README.md`](scripts/README.md)。
 
 ## 安装
 
+### Claude Code
+
 ```bash
-git clone <这个仓库> ~/.claude/skills/paper-to-patent-cn
-# 或者装到某个项目里
-git clone <这个仓库> <项目>/.claude/skills/paper-to-patent-cn
+# 所有项目可用
+git clone https://github.com/lancorrect/paper-to-patent-cn.git ~/.claude/skills/paper-to-patent-cn
+
+# 仅当前项目可用
+git clone https://github.com/lancorrect/paper-to-patent-cn.git .claude/skills/paper-to-patent-cn
 ```
 
-然后复制配置模板并填好：
+### Codex
 
 ```bash
-cd ~/.claude/skills/paper-to-patent-cn
+# 所有项目可用
+git clone https://github.com/lancorrect/paper-to-patent-cn.git ~/.agents/skills/paper-to-patent-cn
+
+# 仅当前项目可用
+git clone https://github.com/lancorrect/paper-to-patent-cn.git .agents/skills/paper-to-patent-cn
+```
+
+### 配置与依赖
+
+在 skill 目录中复制配置模板并填写：
+
+```bash
 cp config.local.md.example config.local.md
 ```
 
-`config.local.md` 装本机与个人相关的一切（Word 登录账户名、Python 环境路径、参照样例在哪、代理机构信息）。它已被 `.gitignore` 忽略，不会入库。skill 的其余文件一律不写死个人信息。
+`config.local.md` 存放本机和个人相关的信息，包括 Word 登录账户名、Python 环境路径、参照样例的位置和代理机构信息。该文件已被 `.gitignore` 忽略，不会入库。
 
-依赖：`python-docx`、`python-pptx`、`lxml`、`latex2mathml`、`Pillow`。
-
-## 六个阶段
-
-| 阶段 | 做什么 | 文档 |
-|---|---|---|
-| 1 论文分析与骨架映射 | 论文 → 映射表 + 权利要求结构 | `references/01-论文映射分析.md` |
-| 2 撰写 | 映射表 → 五件全文 md 草案 | `references/02-撰写规范.md` |
-| 2b 去 AI 味 | 首稿自查通过后，由未参与撰写的模型审计并改写，只跑一次 | `references/02b-去AI味.md` |
-| 3 附图 | 结构规格 → PPT 合集 → 导出图 | `references/03-附图.md` |
-| 4 Word 五件打包 | md → 五个 docx | `references/04-Word打包.md` |
-| 5 事实源转正与快照 | docx 成为事实源，md 快照供 diff | `references/05-事实源与快照.md` |
-| 6 工作流与日志 | 版本目录、日志、提交 | `references/06-工作流与日志.md` |
-
-其中 `01` 和 `02` 是重点。`01` 讲怎么用专利结构当模具去拆论文，以及**哪些实现细节绝对不能从论文推断**；`02` 最厚，把代理机构的全部意见、格式基准、CNIPA 硬规则化成了「怎么写」的正面要求。
-
-## 脚本
+安装 Python 依赖：
 
 ```bash
-# 成稿：md 草案 → 五个标准件 → 格式体检 → 只读快照
-python scripts/build_docx.py      --project <专利>/v1
-python scripts/verify_docx.py     --project <专利>/v1
-python scripts/export_snapshot.py --project <专利>/v1
-
-# 去 AI 味：校验改写只动了表达，没动数字、公式、术语和权利要求
-python scripts/check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.txt
-
-# 返修：读批注与修订 / 比对两轮稿子 / 以 Word 修订模式写入
-python scripts/read_revisions.py 稿子.docx
-python scripts/diff_docx.py 上一轮.docx 这一轮.docx
-python scripts/write_tracked_change.py 稿子.docx --anchor "原文片段" --replace "新文字" --dry-run
+pip install python-docx python-pptx lxml latex2mathml pillow pymupdf numpy
 ```
 
-前三个从 `<专利>/v<N>/patent.json` 读发明名称与附图清单，脚本里不含任何具体专利的内容。写新专利时从 `scripts/template.md` 复制 md 骨架，从 `scripts/patent.json.example` 复制配置。
+部分流程还需要以下软件：
 
-详见 `scripts/README.md`。
+- **Microsoft Word**：目视验收和修订模式返修。
+- **Microsoft PowerPoint**：脚本导出 PNG，仅支持 macOS。其他环境可在 PowerPoint 中手工导出。
+- **第二个 agent**：文风校订须由未参与撰写的 agent 执行，默认使用 [Codex CLI](https://github.com/openai/codex)。
 
-### 三个 docx 工具解决的实际问题
+## License and commercial use
 
-- `read_revisions.py`——读批注时**同时收 `w:t` 与 `m:t`**。只收 `w:t` 会把批注里嵌的公式静默丢掉，实际发生过，导致一度看不懂批注在问什么。
-- `write_tracked_change.py`——四条安全约束：锚点命中必须恰好 1 次否则中止；写入前必查 Word 锁文件；`w:author` 必须是 Word 当前登录账户名（否则 Word 把改动显示成「别人给的建议」）；改完自动做接受/拒绝双向验证，任一不过就不写文件。
-- `diff_docx.py`——按「作者 + 文本」聚合比对，**不按 `w:id`**。Word 保存会重编 id，实测一天之内重编过两次。
+**允许非商业使用。商业使用须事先获得书面授权。**
 
-## 四条红线
+本项目作者撰写的部分采用 [PolyForm Noncommercial License 1.0.0](LICENSE)。个人学习与研究、教学、非商业学术研究，以及教育机构和公共研究机构的使用，均在许可范围内。企业业务使用、付费服务和集成到商业产品，须先提交[商业授权申请](https://github.com/lancorrect/paper-to-patent-cn/issues/new?title=%E5%95%86%E4%B8%9A%E6%8E%88%E6%9D%83%E7%94%B3%E8%AF%B7)。
 
-1. 实验数据不杜撰。临时占位必须显著标注，递交前必须替换或整段删除。
-2. 动 docx / pptx 前先确认没人开着。开着时写入零报错、校验全过，但用户一保存就把改动静默覆盖，事后 `lsof` 也查不出异常。
-3. 实现细节必须向作者核实，不得从论文推断。论文为省篇幅一定会略去实现。
-4. git 提交前必须经用户审核。
-
-## 它沉淀不了什么
-
-- **技术方案的真实细节**——只能规定必须问。
-- **技术判断**——损失函数用哪种、某个细节写不写进说明书、术语叫什么、超参取多少，都得人来定。这些被设计成审核门，不是默认动作。
-- **格式基准会过期**——参照样例可能是十几年前的旧表格，官方模板会改版。
-- **代理机构的偏好只代表那一家。**
-- 本流程假设**方法类论文 → 方法专利**。系统类、装置类的权利要求布局与附图规格都要另行调整。
+文风校订使用 [academic-humanizer](https://github.com/AIScientists-Dev/academic-humanizer)，其 MIT 许可声明见 [`licenses/academic-humanizer-MIT.txt`](licenses/academic-humanizer-MIT.txt)。
 
 ## 致谢
 
-阶段 2b 的方法改写自 [academic-humanizer](https://github.com/AIScientists-Dev/academic-humanizer)（MIT），它又基于 [humanizer](https://github.com/blader/humanizer) 并采用了 [ARMS](https://github.com/koaeraser/ARMS) 的标准。许可声明见 `licenses/academic-humanizer-MIT.txt`。
-
-## 免责
-
-这是撰写辅助工具，不是专利代理人或律师的替代品。新颖性、创造性、侵权、申请时机这类法律判断，本 skill 不下结论。正式申请文件应当由有资质的专利代理人审核后再提交。
+感谢 [academic-humanizer](https://github.com/AIScientists-Dev/academic-humanizer)。它基于 [humanizer](https://github.com/blader/humanizer)，并采用了 [ARMS](https://github.com/koaeraser/ARMS) 的标准。

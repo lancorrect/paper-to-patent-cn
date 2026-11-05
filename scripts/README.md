@@ -49,7 +49,7 @@ python export_snapshot.py --project ~/Desktop/专利/某专利/v1
 
 `build_docx.py` 只在**首次成稿**时用。事实源转正为 docx 之后不要再跑，会覆盖手改（见 `../references/05-事实源与快照.md`）。
 
-## 去 AI 味校验
+## 文风校订的校验
 
 ```bash
 python check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.txt
@@ -59,7 +59,7 @@ python check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.tx
 
 用户决定修改权利要求后加 `--allow-claims`，术语确需增减时加 `--allow-term 某词`（可重复）。退出码 0 为全过，1 为有项不过，2 为输入有问题。
 
-它查不出句子含义的变化，人工审核的要点见 `../references/02b-去AI味.md`。
+它查不出句子含义的变化，人工审核的要点见 `../references/文风校订.md`。
 
 ## docx 批注与修订三件套
 
@@ -82,7 +82,7 @@ python write_tracked_change.py 稿子.docx --anchor "要删的片段" --delete
 
 `write_tracked_change.py` 的四条安全约束，不要绕过：
 
-1. **锚点命中必须恰好 1 次**，否则中止。命中 0 次时会告诉你是不是跨 run 了，换个更短的锚点，别放宽匹配。
+1. **锚点命中必须恰好 1 次**，否则中止。命中 0 次时会提示是否跨 run，换个更短的锚点，别放宽匹配。
 2. **写入前查 Word 锁文件**，检测到就中止。
 3. **作者名默认从 `people.xml` 反解**，取不到唯一值时必须用 `--author` 指定 Word 当前登录账户名。
 4. **自动双向验证**：接受修订后结果正确、拒绝修订后逐字回到原样，任一不过就不写文件。
