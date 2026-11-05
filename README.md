@@ -2,7 +2,7 @@
 
 把一篇学术论文改写成可交付专利代理机构的中国发明专利申请文件。
 
-这是一个 [Claude Code](https://claude.com/claude-code) skill。它覆盖从论文分析到 Word 五标准件打包的完整链路，并带六个可直接运行的 Python 脚本。
+这是一个 [Claude Code](https://claude.com/claude-code) skill。它覆盖从论文分析到 Word 五标准件打包的完整链路，并带七个可直接运行的 Python 脚本。
 
 ## 它是怎么来的
 
@@ -35,6 +35,7 @@ cp config.local.md.example config.local.md
 |---|---|---|
 | 1 论文分析与骨架映射 | 论文 → 映射表 + 权利要求结构 | `references/01-论文映射分析.md` |
 | 2 撰写 | 映射表 → 五件全文 md 草案 | `references/02-撰写规范.md` |
+| 2b 去 AI 味 | 首稿自查通过后，由未参与撰写的模型审计并改写，只跑一次 | `references/02b-去AI味.md` |
 | 3 附图 | 结构规格 → drawio 合集 → 导出图 | `references/03-附图.md` |
 | 4 Word 五件打包 | md → 五个 docx | `references/04-Word打包.md` |
 | 5 事实源转正与快照 | docx 成为事实源，md 快照供 diff | `references/05-事实源与快照.md` |
@@ -49,6 +50,9 @@ cp config.local.md.example config.local.md
 python scripts/build_docx.py      --project <专利>/v1
 python scripts/verify_docx.py     --project <专利>/v1
 python scripts/export_snapshot.py --project <专利>/v1
+
+# 去 AI 味：校验改写只动了表达，没动数字、公式、术语和权利要求
+python scripts/check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.txt
 
 # 返修：读批注与修订 / 比对两轮稿子 / 以 Word 修订模式写入
 python scripts/read_revisions.py 稿子.docx
@@ -80,6 +84,10 @@ python scripts/write_tracked_change.py 稿子.docx --anchor "原文片段" --rep
 - **格式基准会过期**——参照样例可能是十几年前的旧表格，官方模板会改版。
 - **代理机构的偏好只代表那一家。**
 - 本流程假设**方法类论文 → 方法专利**。系统类、装置类的权利要求布局与附图规格都要另行调整。
+
+## 致谢
+
+阶段 2b 的方法改写自 [academic-humanizer](https://github.com/AIScientists-Dev/academic-humanizer)（MIT），它又基于 [humanizer](https://github.com/blader/humanizer) 并采用了 [ARMS](https://github.com/koaeraser/ARMS) 的标准。许可声明见 `licenses/academic-humanizer-MIT.txt`。
 
 ## 免责
 

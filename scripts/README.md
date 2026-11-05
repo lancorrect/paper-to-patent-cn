@@ -40,6 +40,18 @@ python export_snapshot.py --project ~/Desktop/专利/某专利/v1
 
 `build_docx.py` 只在**首次成稿**时用。事实源转正为 docx 之后不要再跑，会覆盖手改（见 `../references/05-事实源与快照.md`）。
 
+## 去 AI 味校验
+
+```bash
+python check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.txt
+```
+
+比较改写前后两份 md，七项全过才算只动了表达：数字；公式与表格；权利要求书整节；术语出现次数；S1–Sn 编号以及技术方案只拆句；冻结句式、技术领域和图号；摘要字数与权项句号。
+
+用户决定修改权利要求后加 `--allow-claims`，术语确需增减时加 `--allow-term 某词`（可重复）。退出码 0 为全过，1 为有项不过，2 为输入有问题。
+
+它查不出句子含义的变化，人工审核的要点见 `../references/02b-去AI味.md`。
+
 ## docx 批注与修订三件套
 
 ```bash
