@@ -152,8 +152,7 @@ pip install python-docx python-pptx lxml latex2mathml pillow pymupdf numpy
 
 ## 贡献者
 
-- [lancorrect](https://github.com/lancorrect)
-- [di-zaiyuan](https://github.com/Di-Zayn)
+<a href="https://github.com/lancorrect"><img src="https://github.com/lancorrect.png?size=120" width="60" height="60" alt="lancorrect" title="lancorrect"></a> <a href="https://github.com/Di-Zayn"><img src="https://github.com/Di-Zayn.png?size=120" width="60" height="60" alt="di-zaiyuan" title="di-zaiyuan"></a>
 
 ## License and commercial use
 
