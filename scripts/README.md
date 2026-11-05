@@ -1,6 +1,6 @@
 # scripts 用法
 
-全部脚本用同一个 Python 环境跑（见 `../config.local.md`）。依赖：`python-docx`、`lxml`、`latex2mathml`、`Pillow`。
+全部脚本用同一个 Python 环境跑（见 `../config.local.md`）。依赖：`python-docx`、`lxml`、`latex2mathml`、`Pillow`；导出附图还要 `pymupdf`、`numpy`。
 
 ## 骨架与配置
 
@@ -25,6 +25,15 @@
 
 目录约定（相对版本目录，不可配置）：`figures/` 放附图 PNG，`word/` 是输出，`snapshots/` 放只读快照。
 
+## 导出附图
+
+```bash
+# figures/附图合集.pptx → patent.json 里列的 PNG，300 dpi，裁白边
+python export_pptx_png.py --project ~/Desktop/专利/某专利/v1
+```
+
+只支持 macOS，本机要装 PowerPoint。PPT 页序要和 `figures` 列表一致，页数对不上会报错。`figures/` 下有 `~$*.pptx` 锁文件时拒绝运行，要先关掉 PowerPoint 里的这个文件。
+
 ## 成稿三件套
 
 ```bash
@@ -46,7 +55,7 @@ python export_snapshot.py --project ~/Desktop/专利/某专利/v1
 python check_style_invariants.py 草案.改前.md 草案.md --terms 术语表.txt
 ```
 
-比较改写前后两份 md，七项全过才算只动了表达：数字；公式与表格；权利要求书整节；术语出现次数；S1–Sn 编号以及技术方案只拆句；冻结句式、技术领域和图号；摘要字数与权项句号。
+比较改写前后两份 md，七项全过才算只动了表达：数字；公式与表格；权利要求书整节；术语出现次数；S1–Sn 编号以及技术方案步骤段不变；冻结句式、技术领域和图号；摘要字数与权项句号。
 
 用户决定修改权利要求后加 `--allow-claims`，术语确需增减时加 `--allow-term 某词`（可重复）。退出码 0 为全过，1 为有项不过，2 为输入有问题。
 

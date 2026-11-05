@@ -9,6 +9,7 @@ __pycache__/
 *.docx
 *.doc
 *.drawio
+*.pptx
 *.pdf
 snapshots/
 word/

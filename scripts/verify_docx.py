@@ -1011,6 +1011,11 @@ def run_checks() -> list[CheckResult]:
             total_counts[structure_name] += len(structures)
             for structure_index, structure in enumerate(structures, start=1):
                 for slot_name in required_slots:
+                    # 只有下限的求和（如对集合求和）上限是隐藏的，Word 不显示这个槽，不算空。
+                    if structure_name == "nary" and slot_name == "sup" and structure.xpath(
+                        "./m:naryPr/m:supHide[@m:val='1']", namespaces=NS
+                    ):
+                        continue
                     slots = structure.xpath(f"./m:{slot_name}", namespaces=NS)
                     if not slots:
                         file_empty_slots.append(

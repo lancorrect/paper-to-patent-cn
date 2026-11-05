@@ -27,7 +27,7 @@ cp config.local.md.example config.local.md
 
 `config.local.md` 装本机与个人相关的一切（Word 登录账户名、Python 环境路径、参照样例在哪、代理机构信息）。它已被 `.gitignore` 忽略，不会入库。skill 的其余文件一律不写死个人信息。
 
-依赖：`python-docx`、`lxml`、`latex2mathml`、`Pillow`。
+依赖：`python-docx`、`python-pptx`、`lxml`、`latex2mathml`、`Pillow`。
 
 ## 六个阶段
 
@@ -36,7 +36,7 @@ cp config.local.md.example config.local.md
 | 1 论文分析与骨架映射 | 论文 → 映射表 + 权利要求结构 | `references/01-论文映射分析.md` |
 | 2 撰写 | 映射表 → 五件全文 md 草案 | `references/02-撰写规范.md` |
 | 2b 去 AI 味 | 首稿自查通过后，由未参与撰写的模型审计并改写，只跑一次 | `references/02b-去AI味.md` |
-| 3 附图 | 结构规格 → drawio 合集 → 导出图 | `references/03-附图.md` |
+| 3 附图 | 结构规格 → PPT 合集 → 导出图 | `references/03-附图.md` |
 | 4 Word 五件打包 | md → 五个 docx | `references/04-Word打包.md` |
 | 5 事实源转正与快照 | docx 成为事实源，md 快照供 diff | `references/05-事实源与快照.md` |
 | 6 工作流与日志 | 版本目录、日志、提交 | `references/06-工作流与日志.md` |
@@ -73,7 +73,7 @@ python scripts/write_tracked_change.py 稿子.docx --anchor "原文片段" --rep
 ## 四条红线
 
 1. 实验数据不杜撰。临时占位必须显著标注，递交前必须替换或整段删除。
-2. 动 docx / drawio 前先确认没人开着。开着时写入零报错、校验全过，但用户一保存就把改动静默覆盖，事后 `lsof` 也查不出异常。
+2. 动 docx / pptx 前先确认没人开着。开着时写入零报错、校验全过，但用户一保存就把改动静默覆盖，事后 `lsof` 也查不出异常。
 3. 实现细节必须向作者核实，不得从论文推断。论文为省篇幅一定会略去实现。
 4. git 提交前必须经用户审核。
 

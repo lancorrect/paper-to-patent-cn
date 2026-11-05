@@ -42,7 +42,7 @@ NUMBER = re.compile(r"\d+(?:\.\d+)?%?")
 STEP_LABEL = re.compile(r"^\*{0,2}S(\d+)\*{0,2}[：:]", re.MULTILINE)
 CLAIM_START = re.compile(r"^\*{0,2}(\d+)、\*{0,2}", re.MULTILINE)
 FIGURE_NUMBER = re.compile(r"图\s*\d+")
-IGNORED_IN_SPLIT_CHECK = re.compile(r"[\s，。；：、,.;:（）()“”‘’「」《》！？!?]")
+WHITESPACE = re.compile(r"\s")
 SEPARATOR = re.compile(r"\s*-{3,}\s*")
 
 FROZEN_PATTERNS = {
@@ -216,18 +216,18 @@ def check_steps(before: Draft, after: Draft) -> CheckResult:
     old_region = scheme_region(before.subsections[SUMMARY])
     new_region = scheme_region(after.subsections[SUMMARY])
     if old_region != new_region:
-        problems.append(f"技术方案步骤段只允许拆句、不允许换词：{first_difference(old_region, new_region)}")
-    return CheckResult(5, "S1–Sn 编号与顺序不变，技术方案只拆句", not problems, tuple(problems))
+        problems.append(f"技术方案步骤段不允许改动，标点也不改：{first_difference(old_region, new_region)}")
+    return CheckResult(5, "S1–Sn 编号与顺序不变，技术方案步骤段不变", not problems, tuple(problems))
 
 
 def scheme_region(summary: str) -> str:
-    """取发明内容里从第一个步骤到最后一个步骤段末的文字，去掉空白和标点后比较。"""
+    """取发明内容里从第一个步骤到最后一个步骤段末的文字，只去掉空白，标点参与比较。"""
     labels = list(STEP_LABEL.finditer(summary))
     if not labels:
         return ""
     paragraph_end = summary.find("\n\n", labels[-1].start())
     end = paragraph_end if paragraph_end != -1 else len(summary)
-    return IGNORED_IN_SPLIT_CHECK.sub("", summary[labels[0].start() : end])
+    return WHITESPACE.sub("", summary[labels[0].start() : end])
 
 
 def check_frozen(before: Draft, after: Draft) -> CheckResult:
