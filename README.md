@@ -8,10 +8,11 @@
 
 [![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)](#license-and-commercial-use)
 [![Clients](https://img.shields.io/badge/Clients-Claude%20Code%20%7C%20Codex-blueviolet.svg)](#安装)
+[![GitHub Stars](https://img.shields.io/github/stars/lancorrect/paper-to-patent-cn?style=social)](https://github.com/lancorrect/paper-to-patent-cn/stargazers)
 
 **允许非商业使用。商业使用须事先获得书面授权。**
 
-[功能](#功能) · [快速开始](#快速开始) · [安装](#安装) · [贡献者](#贡献者) · [License](#license-and-commercial-use) · [致谢](#致谢)
+[功能](#功能) · [快速开始](#快速开始) · [安装](#安装) · [支持本项目](#支持本项目) · [贡献者](#贡献者) · [License](#license-and-commercial-use) · [致谢](#致谢)
 
 <img src="assets/overview.png" alt="paper-to-patent-cn 的流程与特性：从学术论文开始，经骨架映射、撰写、文风校订、附图、Word 打包、事实源转正和交付与返修，产出权利要求书、说明书、说明书附图、说明书摘要和摘要附图" width="860">
 
@@ -149,6 +150,12 @@ pip install python-docx python-pptx lxml latex2mathml pillow pymupdf numpy
 - **Microsoft Word**：目视验收和修订模式返修。
 - **Microsoft PowerPoint**：脚本导出 PNG，仅支持 macOS。其他环境可在 PowerPoint 中手工导出。
 - **第二个 agent**：文风校订须由未参与撰写的 agent 执行，默认使用 [Codex CLI](https://github.com/openai/codex)。
+
+## 支持本项目
+
+如果本项目对您的专利撰写有帮助，欢迎在 GitHub 点一个 Star。也欢迎转给有「论文转专利」需求的同学，Star 越多，需要它的人越容易找到。
+
+使用中遇到问题或有改进建议，请提交 [Issue](https://github.com/lancorrect/paper-to-patent-cn/issues)。
 
 ## 贡献者
 
